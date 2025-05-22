@@ -1,0 +1,15 @@
+server:
+  port: 8080
+logging:
+  level:
+    root: info
+    com.achumachenko.jefferson: debug
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/srb_db?currentSchema=jefferson_api_db
+    username: user
+    password: password
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.xml
