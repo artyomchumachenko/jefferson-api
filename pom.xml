@@ -51,4 +51,15 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <!-- ОБЯЗАТЕЛЬНО -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <!-- версию можно опустить, если проект наследует spring-boot-starter-parent -->
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
