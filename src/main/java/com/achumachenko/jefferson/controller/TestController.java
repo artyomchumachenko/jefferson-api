@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/test")
 @CrossOrigin(origins = "*")
 public class TestController {
-    // test 123
+    // test 123 123
     @GetMapping
     public ResponseEntity<String> test() {
         return ResponseEntity.ok("Ok");
