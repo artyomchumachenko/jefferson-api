@@ -41,13 +41,13 @@ pipeline {
 
     stage('Deploy') {
       steps {
-        sshagent([env.GIT_CREDENTIALS]) {
-          // копируем JAR и перезапускаем сервис
-          sh """
-            cp backend/target/*.jar ${DEPLOY_DIR}
-            systemctl restart ${SERVICE_NAME}
-          """
-        }
+        // Синхронизируем workspace/backend → продовую папку
+        sh '''
+          rm -rf ${DEPLOY_DIR}/*
+          rsync -av --delete backend/ ${DEPLOY_DIR}/
+        '''
+        // Перезапускаем сервис
+        sh 'systemctl restart ${SERVICE_NAME}'
       }
     }
   }
