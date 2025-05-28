@@ -24,6 +24,7 @@ pipeline {
               fi
               cd backend
               git fetch --all
+              git pull origin master
               git reset --hard origin/master
             '''
         }
