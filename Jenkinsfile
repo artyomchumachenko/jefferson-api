@@ -17,14 +17,15 @@ pipeline {
     stage('Checkout & Fetch') {
       steps {
         sshagent([env.GIT_CREDENTIALS]) {
-          // клонируем (если пусто) или обновляем:
-          sh '''
-            if [ ! -d jefferson-api ]; then
-              git clone git@github.com:artyomchumachenko/jefferson-api.git
-            fi
-            git fetch --all
-            git reset --hard origin/master
-          '''
+          // клонируем репо прямо в папку backend или обновляем её
+            sh '''
+              if [ ! -d backend ]; then
+                git clone git@github.com:artyomchumachenko/jefferson-api.git backend
+              fi
+              cd backend
+              git fetch --all
+              git reset --hard origin/master
+            '''
         }
       }
     }
