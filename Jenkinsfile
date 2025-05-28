@@ -3,7 +3,7 @@ pipeline {
 
   environment {
     GIT_CREDENTIALS = 'TSSH'
-    DEPLOY_DIR      = '/opt/myapp/backend/'
+    DEPLOY_DIR      = '/opt/myapp/backend'
     SERVICE_NAME    = 'myapp-backend.service'
   }
 
@@ -22,7 +22,6 @@ pipeline {
             if [ ! -d jefferson-api ]; then
               git clone git@github.com:artyomchumachenko/jefferson-api.git
             fi
-            cd jefferson-api
             git fetch --all
             git reset --hard origin/master
           '''
