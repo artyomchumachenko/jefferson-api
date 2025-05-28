@@ -33,7 +33,7 @@ pipeline {
     stage('Build') {
       steps {
         dir('jefferson-api') {
-          sh './mvnw clean package -DskipTests'
+          sh 'mvn clean package -DskipTests'
         }
       }
     }
