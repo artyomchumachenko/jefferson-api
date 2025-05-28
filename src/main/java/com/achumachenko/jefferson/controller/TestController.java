@@ -13,6 +13,6 @@ public class TestController {
     // test 123 123
     @GetMapping
     public ResponseEntity<String> test() {
-        return ResponseEntity.ok("Ok");
+        return ResponseEntity.ok("Ok. Test Jenkins.");
     }
 }
