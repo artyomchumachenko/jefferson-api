@@ -43,8 +43,8 @@ pipeline {
         sshagent([env.GIT_CREDENTIALS]) {
           // копируем JAR и перезапускаем сервис
           sh """
-            sudo cp jefferson-api/target/*.jar ${DEPLOY_DIR}
-            sudo systemctl restart ${SERVICE_NAME}
+            cp jefferson-api/target/*.jar ${DEPLOY_DIR}
+            systemctl restart ${SERVICE_NAME}
           """
         }
       }
