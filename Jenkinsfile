@@ -4,7 +4,7 @@ pipeline {
   environment {
     GIT_CREDENTIALS = 'TSSH'
     DEPLOY_DIR      = '/opt/myapp/backend/'
-    SERVICE_NAME    = 'jefferson-api'
+    SERVICE_NAME    = 'myapp-backend.service'
   }
 
   stages {
