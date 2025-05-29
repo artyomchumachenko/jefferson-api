@@ -8,13 +8,12 @@ pipeline {
   }
 
   stages {
-    stage('Prepare & Checkout') {
+    stage('Checkout & Fetch') {
       steps {
-        deleteDir()
         sshagent([env.GIT_CREDENTIALS]) {
+          // Если папки нет — клонируем, иначе просто fetch
           sh '''
-            # Клоним или апдейтим workspace/backend
-            if [ ! -d backend ]; then
+            if [ ! -d backend/.git ]; then
               git clone git@github.com:artyomchumachenko/jefferson-api.git backend
             fi
             cd backend
@@ -24,45 +23,53 @@ pipeline {
       }
     }
 
-    stage('Check → Build & Deploy if needed') {
+    stage('Check Changes') {
       steps {
         script {
           dir('backend') {
-            // получить локальный и удалённый хеш
-            def local  = sh(script: 'git rev-parse HEAD',            returnStdout: true).trim()
-            def remote = sh(script: 'git rev-parse origin/master',   returnStdout: true).trim()
+            // локальный и удалённый хеши
+            def local  = sh(script: 'git rev-parse HEAD',          returnStdout: true).trim()
+            def remote = sh(script: 'git rev-parse origin/master', returnStdout: true).trim()
 
             if (local == remote) {
-              echo "⚠️ Нет новых коммитов (локальный и origin/master = ${local}). Заканчиваем pipeline."
-              // прерываем остальные шаги, но считаем билд успешным
+              echo "⚠️ HEAD (${local}) совпадает с origin/master — обновлений нет, pipeline завершён."
               currentBuild.result = 'SUCCESS'
-              return
+              // true = остановить и не выполнять последующие шаги
+              error('No changes')
+            } else {
+              echo "✅ Новые коммиты: локалка ${local} vs origin ${remote} — продолжаем."
+              sh 'git reset --hard origin/master'
             }
-
-            echo "✅ Обнаружены новые коммиты (локальный ${local} vs origin ${remote}). Начинаем сборку → деплой."
-
-            // переключаемся на свежие изменения
-            sh 'git reset --hard origin/master'
-
-            // сборка
-            sh 'mvn clean package -DskipTests'
-
-            // копируем всё из backend в продовую папку
-            sh """
-              rm -rf ${env.DEPLOY_DIR}/*
-              rsync -av --delete . ${env.DEPLOY_DIR}/
-            """
-
-            // перезапуск сервиса
-            sh "systemctl restart ${env.SERVICE_NAME}"
           }
         }
+      }
+    }
+
+    stage('Build & Deploy') {
+      steps {
+        dir('backend') {
+          sh 'mvn clean package -DskipTests'
+        }
+        // Деплойим всё содержимое backend в продовую папку
+        sh '''
+          rm -rf ${DEPLOY_DIR}/*
+          rsync -av --delete backend/ ${DEPLOY_DIR}/
+          systemctl restart ${SERVICE_NAME}
+        '''
       }
     }
   }
 
   post {
-    success { echo '🎉 Pipeline отработал успешно.' }
-    failure { echo '❌ Pipeline упал, смотрите логи.' }
+    success { echo '🎉 Завершено.' }
+    failure {
+      script {
+        if (currentBuild.result == 'SUCCESS') {
+          echo 'ℹ️ Без обновлений, билд/деплой не выполнялись.'
+        } else {
+          echo '❌ Ошибка, смотрите логи.'
+        }
+      }
+    }
   }
 }
